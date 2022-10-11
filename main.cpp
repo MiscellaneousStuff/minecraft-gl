@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "common/shader.hpp"
 
 int main(int argc, char *argv[]) {
@@ -50,6 +52,15 @@ int main(int argc, char *argv[]) {
 
     GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
     
+    // Get a handle for our "MVP" uniform
+	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+
+    // Projection Matrix
+    int width = 1024;
+    int height= 768;
+
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float) width / (float)height, 0.1f, 100.0f);
+
     static const GLfloat g_vertex_buffer_data[]  {
         -1.0f, -1.0f, 0.0f,
         1.0f, -1.0f, 0.0f,
@@ -61,12 +72,30 @@ int main(int argc, char *argv[]) {
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
+    
+
+    // Camera Matrix
+    glm::mat4 View = glm::lookAt(
+        glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+        glm::vec3(0,0,0), // and looks at the origin
+        glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+
+    // Model matrix
+    glm::mat4 Model = glm::mat4(1.0f);
+
+    // MVP Matrix
+    glm::mat4 MVP = Projection * View * Model;
+    
+
     do {
         // Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(programID);
 
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+        
         // Draw nothing, see you in tutorial 2 !
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
