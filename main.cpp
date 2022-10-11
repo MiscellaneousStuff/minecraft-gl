@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+GLFWwindow* window;
 
 #include <glm/glm.hpp>
 using namespace glm;
@@ -10,6 +11,7 @@ using namespace glm;
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/shader.hpp"
+#include "common/controls.hpp"
 
 int main(int argc, char *argv[]) {
     glewExperimental = true; // Needed for core profile
@@ -27,8 +29,7 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Init GL window
-    GLFWwindow* window; // (In the accompanying source code, this variable is global for simplicity)
-    window = glfwCreateWindow( 1024, 768, "Tutorial 01", NULL, NULL);
+    window = glfwCreateWindow( 1024, 768, "Minecraft GL", NULL, NULL);
     if( window == NULL ){
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
         glfwTerminate();
@@ -44,10 +45,17 @@ int main(int argc, char *argv[]) {
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+    // Enable unlimited mouse movement and hide mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwPollEvents();
+    glfwSetCursorPos(window, 1024/2, 768/2);
+
+    glClearColor(0.1f, 0.92f, 0.97f, 0.0f);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
 
     GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -64,45 +72,46 @@ int main(int argc, char *argv[]) {
 
     glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float) width / (float)height, 0.1f, 100.0f);
 
+    // One color for each vertex. They were generated randomly.
     static const GLfloat g_vertex_buffer_data[]  {
-        -1.0f,-1.0f,-1.0f, // triangle 1 : begin
-        -1.0f,-1.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f, // triangle 1 : end
-        1.0f, 1.0f,-1.0f, // triangle 2 : begin
-        -1.0f,-1.0f,-1.0f,
-        -1.0f, 1.0f,-1.0f, // triangle 2 : end
-        1.0f,-1.0f, 1.0f,
-        -1.0f,-1.0f,-1.0f,
-        1.0f,-1.0f,-1.0f,
-        1.0f, 1.0f,-1.0f,
-        1.0f,-1.0f,-1.0f,
-        -1.0f,-1.0f,-1.0f,
-        -1.0f,-1.0f,-1.0f,
-        -1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f,-1.0f,
-        1.0f,-1.0f, 1.0f,
-        -1.0f,-1.0f, 1.0f,
-        -1.0f,-1.0f,-1.0f,
-        -1.0f, 1.0f, 1.0f,
-        -1.0f,-1.0f, 1.0f,
-        1.0f,-1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,
-        1.0f,-1.0f,-1.0f,
-        1.0f, 1.0f,-1.0f,
-        1.0f,-1.0f,-1.0f,
-        1.0f, 1.0f, 1.0f,
-        1.0f,-1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f,-1.0f,
-        -1.0f, 1.0f,-1.0f,
-        1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f,-1.0f,
-        -1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,
-        1.0f,-1.0f, 1.0f
+        -0.5f,-0.5f,-0.5f, // triangle 1 : begin
+        -0.5f,-0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f, // triangle 1 : end
+        0.5f, 0.5f,-0.5f, // triangle 2 : begin
+        -0.5f,-0.5f,-0.5f,
+        -0.5f, 0.5f,-0.5f, // triangle 2 : end
+        0.5f,-0.5f, 0.5f,
+        -0.5f,-0.5f,-0.5f,
+        0.5f,-0.5f,-0.5f,
+        0.5f, 0.5f,-0.5f,
+        0.5f,-0.5f,-0.5f,
+        -0.5f,-0.5f,-0.5f,
+        -0.5f,-0.5f,-0.5f,
+        -0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f,-0.5f,
+        0.5f,-0.5f, 0.5f,
+        -0.5f,-0.5f, 0.5f,
+        -0.5f,-0.5f,-0.5f,
+        -0.5f, 0.5f, 0.5f,
+        -0.5f,-0.5f, 0.5f,
+        0.5f,-0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        0.5f,-0.5f,-0.5f,
+        0.5f, 0.5f,-0.5f,
+        0.5f,-0.5f,-0.5f,
+        0.5f, 0.5f, 0.5f,
+        0.5f,-0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f,-0.5f,
+        -0.5f, 0.5f,-0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f,-0.5f,
+        -0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+        0.5f,-0.5f, 0.5f
     };
-    
+
     // One color for each vertex. They were generated randomly.
     static const GLfloat g_color_buffer_data[] = {
         0.583f,  0.771f,  0.014f,
@@ -142,7 +151,7 @@ int main(int argc, char *argv[]) {
         0.820f,  0.883f,  0.371f,
         0.982f,  0.099f,  0.879f
     };
-
+    
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
@@ -173,6 +182,12 @@ int main(int argc, char *argv[]) {
 
         glUseProgram(programID);
 
+        computeMatricesFromInputs();
+		glm::mat4 ProjectionMatrix = getProjectionMatrix();
+		glm::mat4 ViewMatrix = getViewMatrix();
+		glm::mat4 ModelMatrix = glm::mat4(1.0);
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
         // Draw nothing, see you in tutorial 2 !
@@ -200,7 +215,9 @@ int main(int argc, char *argv[]) {
         );
 
         glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
         
         // Swap buffers
         glfwSwapBuffers(window);
@@ -208,7 +225,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Check if the ESC key was pressed or the window was closed
-    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+    while( glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
         glfwWindowShouldClose(window) == 0 );
     
     // Cleanup VBO
